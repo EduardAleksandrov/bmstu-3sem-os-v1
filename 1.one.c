@@ -25,6 +25,7 @@ int main(void)
 
 // --- ожидание окончания процесса
     int status, pid;
+    // while(wait(NULL)>0) // ждет пока все дочерние процессы завершатся
     while((pid = waitpid(childpid, &status, WUNTRACED)) > 0) //Возвращает идентификатор дочернего процесса, -1 ошибка
     { 
         if(WIFEXITED(status))
