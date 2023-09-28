@@ -1,6 +1,12 @@
 
-run0.c:
+run0.cpp:
 	g++ -std=c++17 ./0.check.cpp -o ./build/0.check -g && ./build/0.check
 
-run0.cpp:
+run0.c:
 	gcc -std=c17 ./21.arrayinfun.c -o build/21.arrayinfun -g && ./build/21.arrayinfun
+
+
+run1.one:
+	gcc -std=c17 ./1.one.c -o build/1.one -g && ./build/1.one
+run1.oneexec:
+	gcc -std=c17 ./1.oneexec.c -o build/1.oneexec -g && ./build/1.oneexec
