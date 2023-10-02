@@ -1,3 +1,4 @@
+// Создание дочерних процессов, передача файла программы дочернему процессу, ожидание wait
 #define _GNU_SOURCE // для работы WCOREDUMP, WIFCONTINUED
 
 #include <stdio.h>

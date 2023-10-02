@@ -10,3 +10,12 @@ run1.one:
 	gcc -std=c17 ./1.one.c -o build/1.one -g && ./build/1.one
 run1.oneexec:
 	gcc -std=c17 ./1.oneexec.c -o build/1.oneexec -g && ./build/1.oneexec
+
+run2.pipe:
+	gcc -std=c17 ./2.pipe.c -o build/2.pipe -g && ./build/2.pipe
+
+
+run3.pipe:
+	gcc -std=c17 ./3.pipe.c -o build/3.pipe -g && ./build/3.pipe
+run3.pipeexec:
+	gcc -std=c17 ./3.pipeexec.c -o build/3.pipeexec
