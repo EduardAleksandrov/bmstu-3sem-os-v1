@@ -22,3 +22,7 @@ run3.pipeexec:
 
 run4.system:
 	gcc -std=c17 ./4.system.c -o build/4.system -g && ./build/4.system
+
+
+run5.filetable:
+	gcc -std=c17 ./5.filetable.c -o build/5.filetable -g && ./build/5.filetable
