@@ -19,3 +19,6 @@ run3.pipe:
 	gcc -std=c17 ./3.pipe.c -o build/3.pipe -g && ./build/3.pipe
 run3.pipeexec:
 	gcc -std=c17 ./3.pipeexec.c -o build/3.pipeexec
+
+run4.system:
+	gcc -std=c17 ./4.system.c -o build/4.system -g && ./build/4.system
