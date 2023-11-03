@@ -1,4 +1,4 @@
-// Запись и чтение в неименованный pipe
+// Запись и чтение в неименованный pipe, строки задаем в parent
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,7 +10,7 @@ int main()
     int pipefd[2]; // имя массива дескрипторов
     char buf;
     pid_t cpid[2];
-    char *msg[15] = {"aaa\n", "cccccnnnnnnnnnnnn\n"}; // размер столбцов 15
+    char *msg[15] = {"aaa\n", "cccccnnnnnnnnnnnn\n"}; // размер столбцов 15, наследование сегментов данных, pipe - буфер ядра и его достаточно размером со страницу
 
     if (pipe(pipefd) == -1) {
         perror("pipe");
@@ -43,4 +43,6 @@ int main()
 
         // write(STDOUT_FILENO, "\n", 1);
         close(pipefd[0]);
+
+        return 0;
 }

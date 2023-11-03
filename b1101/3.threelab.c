@@ -1,4 +1,4 @@
-// обработчик сигнала SIGINT
+// обработчик сигнала SIGINT, строки задаем в child
 #define _GNU_SOURCE 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,16 +25,17 @@ int main()
         perror("pipe");
         exit(EXIT_FAILURE);
     }
-     if(signal(SIGINT, signal_handler)==SIG_ERR)
-     {
+    if(signal(SIGINT, signal_handler)==SIG_ERR) // проверка на ошибку сигнала
+    {
         perror("signal");
         exit(1);
-     } // kill потомка вызов -(kill -INT pid)
+    } // kill потомка вызов -(kill -INT pid)
      sleep(3);
     for(int	i = 0; i < 2; i++)
     {
         cpid[i] = fork();
-        if (cpid[i] == -1) {
+        if (cpid[i] == -1) 
+        {
             perror("fork");
             exit(EXIT_FAILURE);
         }
@@ -46,7 +47,7 @@ int main()
                 close(pipefd[0]);
                 
                 char *msg;
-                if(i==0) msg = "aaa\n";
+                if(i==0) msg = "aaa\n"; // нет наследования
                 else msg = "bbbb\n";
 
                 write(pipefd[1], msg, strlen(msg));
@@ -63,18 +64,23 @@ int main()
         for(int	i=0;i<2;i++)
         {
             w = waitpid(cpid[i], &wstatus, WUNTRACED | WCONTINUED);
-            if (w == -1) {
+            if (w == -1) 
+            {
                 perror("waitpid");
                 exit(EXIT_FAILURE);
             }
 
-            if (WIFEXITED(wstatus)) {
+            if (WIFEXITED(wstatus)) 
+            {
                 printf("exited, status=%d\n", WEXITSTATUS(wstatus));
-            } else if (WIFSIGNALED(wstatus)) {
+            } else if (WIFSIGNALED(wstatus)) 
+            {
                 printf("killed by signal %d\n", WTERMSIG(wstatus));
-            } else if (WIFSTOPPED(wstatus)) {
+            } else if (WIFSTOPPED(wstatus)) 
+            {
                 printf("stopped by signal %d\n", WSTOPSIG(wstatus));
-            } else if (WIFCONTINUED(wstatus)) {
+            } else if (WIFCONTINUED(wstatus)) 
+            {
                 printf("continued\n");
             }
         }
