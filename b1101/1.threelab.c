@@ -10,7 +10,7 @@ int main()
     int pipefd[2]; // имя массива дескрипторов
     char buf;
     pid_t cpid[2];
-    char *msg[2] = {"aaa\n", "ccccc\n"};
+    char *msg[15] = {"aaa\n", "cccccnnnnnnnnnnnn\n"}; // размер столбцов 15
 
     if (pipe(pipefd) == -1) {
         perror("pipe");
@@ -25,8 +25,9 @@ int main()
         }
 
         if (cpid[i] == 0) {
+            printf("Child %d послал %s \n", getpid(), msg[i]);
             close(pipefd[0]);
-            write(pipefd[1], msg[i], strlen(msg[i]));
+            write(pipefd[1], msg[i], strlen(msg[i])); 
             close(pipefd[1]);
             _exit(EXIT_SUCCESS);
 

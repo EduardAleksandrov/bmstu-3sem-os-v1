@@ -1,4 +1,5 @@
 // обработчик сигнала SIGINT
+#define _GNU_SOURCE 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,14 +18,20 @@ int main()
 {
     int pipefd[2];
     char buf;
-    pid_t cpid[2];
+    pid_t cpid[2], w;
+    int wstatus;
 
     if (pipe(pipefd) == -1) {
         perror("pipe");
         exit(EXIT_FAILURE);
     }
-    
-    for(int	i=0;i<2;i++)
+     if(signal(SIGINT, signal_handler)==SIG_ERR)
+     {
+        perror("signal");
+        exit(1);
+     } // kill потомка вызов -(kill -INT pid)
+     sleep(3);
+    for(int	i = 0; i < 2; i++)
     {
         cpid[i] = fork();
         if (cpid[i] == -1) {
@@ -32,10 +39,8 @@ int main()
             exit(EXIT_FAILURE);
         }
 
-        if (cpid[i] == 0) {  
-
-            signal(SIGINT, signal_handler); // kill потомка вызов -(kill -INT pid)
-            sleep(30);
+        if (cpid[i] == 0) 
+        {
             if(flag == 1)
             {
                 close(pipefd[0]);
@@ -48,13 +53,32 @@ int main()
                 close(pipefd[1]);
             }
             
-            _exit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         } else {
-
+            printf("PP: childpid=%d\n", cpid[i]);
         }
     }
-        wait(NULL);
+      //  wait(NULL);
+        for(int	i=0;i<2;i++)
+        {
+            w = waitpid(cpid[i], &wstatus, WUNTRACED | WCONTINUED);
+            if (w == -1) {
+                perror("waitpid");
+                exit(EXIT_FAILURE);
+            }
+
+            if (WIFEXITED(wstatus)) {
+                printf("exited, status=%d\n", WEXITSTATUS(wstatus));
+            } else if (WIFSIGNALED(wstatus)) {
+                printf("killed by signal %d\n", WTERMSIG(wstatus));
+            } else if (WIFSTOPPED(wstatus)) {
+                printf("stopped by signal %d\n", WSTOPSIG(wstatus));
+            } else if (WIFCONTINUED(wstatus)) {
+                printf("continued\n");
+            }
+        }
+
         close(pipefd[1]);
 
         while (read(pipefd[0], &buf, 1) > 0)
@@ -63,6 +87,5 @@ int main()
         write(STDOUT_FILENO, "\n", 1);
         close(pipefd[0]);
 
-        
-
+        return 0;
 }
