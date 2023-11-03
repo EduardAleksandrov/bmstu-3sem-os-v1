@@ -1,4 +1,4 @@
-// обработчик сигнала SIGTERM
+// обработчик сигнала SIGINT
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,8 +34,8 @@ int main()
 
         if (cpid[i] == 0) {  
 
-            signal(SIGTERM, signal_handler); // kill потомка
-            sleep(20);
+            signal(SIGINT, signal_handler); // kill потомка вызов -(kill -INT pid)
+            sleep(30);
             if(flag == 1)
             {
                 close(pipefd[0]);

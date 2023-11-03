@@ -7,7 +7,7 @@
 
 int main()
 {
-    int pipefd[2];
+    int pipefd[2]; // имя массива дескрипторов
     char buf;
     pid_t cpid[2];
     char *msg[2] = {"aaa\n", "ccccc\n"};
@@ -40,6 +40,6 @@ int main()
         while (read(pipefd[0], &buf, 1) > 0)
             write(STDOUT_FILENO, &buf, 1);
 
-        write(STDOUT_FILENO, "\n", 1);
+        // write(STDOUT_FILENO, "\n", 1);
         close(pipefd[0]);
 }
