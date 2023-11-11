@@ -63,6 +63,6 @@ int main()
         write(STDOUT_FILENO, "\n", 1);
         close(pipefd[0]);
 
-        
+    return 0;
 
 }
