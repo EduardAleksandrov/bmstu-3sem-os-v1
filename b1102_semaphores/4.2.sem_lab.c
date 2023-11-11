@@ -1,5 +1,6 @@
 /*
-    TASK Лаба 7: Семафор и разделяемая память - работает
+    TASK Лаба 7: Семафор и разделяемая память
+    эксперимантальная
 */
 #define _GNU_SOURCE 
 #include <stdio.h>
@@ -47,10 +48,11 @@ int main()
     }
     strcpy(data[0], s1);
     strcpy(data[1], s2);
+    int shm[3] = {shmid[0], shmid[1], shmid[2]};
 //---
 // установка семафора
     int perms = S_IRWXU | S_IRWXG | S_IRWXO;
-    int fd = semget(100, 2, IPC_CREAT | perms);
+    int fd = semget(99, 2, IPC_CREAT | perms);
     if(fd==-1)
     {
         perror("semop");
@@ -115,7 +117,7 @@ int main()
         {
             perror("shmdt");
         }
-        if(shmctl(shmid[i], IPC_RMID, NULL) == -1)
+        if(shmctl(shm[i], IPC_RMID, NULL) == -1)
         {
             perror("shmctl");
         }
@@ -131,7 +133,7 @@ int producer(int fd, char *data)
 
         printf("%c", data[i]);
         fflush(stdout);
-        sleep(1);
+        // sleep(1);
 
         semop(fd, prod_end, 2);
     }
@@ -145,7 +147,7 @@ int consumer(int fd, char *data)
         
         printf("%c", data[i]);
         fflush(stdout);
-        sleep(1);
+        // sleep(1);
         
         semop(fd, cons_end, 2);
     }
