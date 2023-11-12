@@ -17,3 +17,6 @@ run_4.2.sem_lab:
 
 run_4.3.sem_lab:
 	gcc -std=c17 ./4.3.sem_lab.c -o build/4.3.sem_lab -g && ./build/4.3.sem_lab
+
+run_4.4.sem_lab:
+	gcc -std=c17 ./4.4.sem_lab.c -o build/4.4.sem_lab -g && ./build/4.4.sem_lab
