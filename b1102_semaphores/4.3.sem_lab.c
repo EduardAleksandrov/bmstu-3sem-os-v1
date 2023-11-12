@@ -1,6 +1,6 @@
 /*
     TASK Лаба 7: Семафор и разделяемая память
-    эксперимантальная
+    без указателей - работает
 */
 #define _GNU_SOURCE 
 #include <stdio.h>
@@ -62,6 +62,32 @@ int main()
         exit(1);
     }
 
+    int shmid_three;
+    int *start;
+    if((shmid_three = shmget(102, SHM_SIZE, 0644 | IPC_CREAT)) == -1) {
+        perror("shmget");
+        exit(1);
+    }
+    if ((start = (int*)shmat(shmid_three, NULL, 0)) == (void *)-1) {
+        perror("shmat");
+        exit(1);
+    }
+    *start = 0;
+
+    int shmid_four;
+    int *end;
+    if((shmid_four = shmget(103, SHM_SIZE, 0644 | IPC_CREAT)) == -1) {
+        perror("shmget");
+        exit(1);
+    }
+    if ((end = (int*)shmat(shmid_four, NULL, 0)) == (void *)-1) {
+        perror("shmat");
+        exit(1);
+    }
+    *end = 0;
+
+    
+
     char *endPosition;
     endPosition = startPos + Q_SIZE - 1;
     
@@ -94,37 +120,23 @@ int main()
 
         if (cpid[i] == 0) 
         {
-            if(i == 0, i == 1, i == 2)
+            if(i % 2 == 0)
             {
                 // producer(fd, data, startPos, endPosition, fpos, &lpos);
-                bool check = 0;
                 char value;
-                int i = 0;
-                char added_v;
-                char*added =&added_v;
-
-                char dr_v;
-                char *dropedValue = &dr_v;
-                for(int j = 0; j < 100; j++)
+                int j = 0;
+                while(1)
                 {
                     semop(fd, prod_start, 2);
-                    value = data[i++];
-                    if(i == 51) i = 0;
+                    value = data[j++];
+                    if(j == 51) j = 0;
 
                     // printf("%d %c", i, value);
                     // fflush(stdout);
-
-                    check = addElementToQueue(fpos, lpos, startPos, endPosition, value, added);
-                    if(check == 1)
-                    {
-                        printf("Очередь полна");
-                        fflush(stdout);
-                    }
-                    printf("%d", fpos == lpos);
-                    fflush(stdout);
-                    check = deleteElementFromQueue(fpos, lpos, startPos, endPosition, dropedValue);
-                    printf("Элемент %s", dropedValue);
-                    fflush(stdout);
+                    startPos[*start] = value;
+                    *start+=1;
+                    if(*start == 10) *start = 0; 
+                    
 
                     sleep(1);
 
@@ -132,25 +144,27 @@ int main()
                 }
             } else {
                 // consumer(fd, data, startPos, endPosition, &fpos, &lpos);
-                // bool check = 0;
-                // char dr_v;
-                // char *dropedValue = &dr_v;
-                // while(1)
-                // {
-                //     semop(fd, cons_start, 2);
+                bool check = 0;
+                char dr_v;
+                char *dropedValue = &dr_v;
+                while(1)
+                {
+                    semop(fd, cons_start, 2);
+
+                    if(*start != *end)
+                    {
+                        printf("%c", startPos[*end]);
+                        fflush(stdout);
+                        *end+=1;
+                        if(*end == 10) *end = 0;
+                    }
                     
-                //     check = deleteElementFromQueue(fpos, lpos, startPos, endPosition, dropedValue);
-                //     // if(check == 1)
-                //     // {
-                //     //     printf("Очередь пуста");
-                //     //     fflush(stdout);
-                //     // }
-                //     printf("Элемент %s", dropedValue);
-                //     fflush(stdout);
-                //     sleep(1);
                     
-                //     semop(fd, cons_end, 2);
-                // }
+
+                    sleep(1);
+                    
+                    semop(fd, cons_end, 2);
+                }
             }
             exit(EXIT_SUCCESS);
         } else {
@@ -295,7 +309,7 @@ bool addElementToQueue(char *fpos, char *lpos, char *startPos, char *endPosition
         // std::cout << "Очередь полна" << std::endl;
         return 1;
     } else {
-        (lpos)++;
+        lpos+=1;
         *(lpos - 1) = value;
         *added = *(lpos - 1);
     }
@@ -313,7 +327,7 @@ bool deleteElementFromQueue(char *fpos, char *lpos, char *startPos, char *endPos
         return 1;
     }
     int dropedElement = *fpos;
-    *fpos = 0;
+    // *fpos = 0;
 
     // if(*lpos+1 != *fpos) addLastElement = 0;
 
@@ -325,8 +339,8 @@ bool deleteElementFromQueue(char *fpos, char *lpos, char *startPos, char *endPos
     {
         if(addLastElement == 1) // указатель не проедет дальше при следующем удалении, останется на месте
         {
-            (lpos)++;
-            addLastElement = 0;
+            lpos+=1;
+            // addLastElement = 0;
         }
         
     }
@@ -335,7 +349,7 @@ bool deleteElementFromQueue(char *fpos, char *lpos, char *startPos, char *endPos
     {
         fpos = startPos;
     } else {
-        (fpos)++;
+        fpos+=1;
     }
     *dropedValue = dropedElement;
     return 0;
