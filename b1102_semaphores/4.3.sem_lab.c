@@ -15,7 +15,9 @@
 #include <sys/sem.h>
 #include <fcntl.h> // S_IRWXU
 #include <stdbool.h>
+
 #define SHM_SIZE 1024
+#define Q_SIZE 20
 
 // se = 0, sf = 1, sb = 2;
 struct sembuf prod_start[2] = {{0,-1, 0}, {2,-1, 0}};
@@ -202,7 +204,7 @@ int producer(int fd, char *data, char *startPos, int *start)
 
         startPos[*start] = value;
         *start += 1;
-        if(*start == 10) *start = 0; 
+        if(*start == Q_SIZE) *start = 0; 
         sleep(1);
 
         semop(fd, prod_end, 2);
@@ -221,7 +223,7 @@ int consumer(int fd, char *startPos, int *start, int *end)
             printf("%c", startPos[*end]);
             fflush(stdout);
             *end += 1;
-            if(*end == 10) *end = 0;
+            if(*end == Q_SIZE) *end = 0;
         }
         sleep(1);
         
