@@ -2,7 +2,7 @@
 [![Unix/Linux](https://img.shields.io/badge/Unix/Linux-238c05)](https://en.wikipedia.org/wiki/Unix)
 
 
-# Операционная система Unix/Linux
+# Операционные системы Unix/Linux
 
 > BMSTU IU7 3 семестр 2023
 
@@ -24,4 +24,6 @@
     3.2 (2.threelab.c) обработчик сигнала SIGTERM
     3.3 (3.threelab.c) обработчик сигнала SIGINT, строки задаем в child
 
+4. Файл (./b1102)
+    4.1 (4.4.sem_lab.c) Семафор и разделяемая память. Производство/потребление. Пишем в буфер, а потом читаем из него. 
 ```
