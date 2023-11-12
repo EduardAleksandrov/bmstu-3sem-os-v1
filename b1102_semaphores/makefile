@@ -9,8 +9,8 @@ run_2.sem:
 run_3.shm:
 	gcc -std=c17 ./3.shm.c -o build/3.shm -g && ./build/3.shm
 
-run_4.1sem_lab:
+run_4.1.sem_lab:
 	gcc -std=c17 ./4.1.sem_lab.c -o build/4.1.sem_lab -g && ./build/4.1.sem_lab
 
-run_4.2sem_lab:
+run_4.2.sem_lab:
 	gcc -std=c17 ./4.2.sem_lab.c -o build/4.2.sem_lab -g && ./build/4.2.sem_lab

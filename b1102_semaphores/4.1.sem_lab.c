@@ -33,7 +33,7 @@ int main()
     char * s2 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     int shmid[3];
-    char *data[3];
+    char *data[30];
     for(int i = 0; i < 3; i++)
     {
         if((shmid[i] = shmget(i+100, SHM_SIZE, 0644 | IPC_CREAT)) == -1) {
