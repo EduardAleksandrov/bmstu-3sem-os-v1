@@ -35,34 +35,41 @@ int main()
 
     int shmid_one;
     char *data;
-    if((shmid_one = shmget(100, SHM_SIZE, 0644 | IPC_CREAT)) == -1) {
+    if((shmid_one = shmget(100, SHM_SIZE, 0644 | IPC_CREAT)) == -1) 
+    {
         perror("shmget");
         exit(1);
     }
-    if ((data = shmat(shmid_one, NULL, 0)) == (void *)-1) {
+    if ((data = shmat(shmid_one, NULL, 0)) == (void *)-1) 
+    {
         perror("shmat");
         exit(1);
     }
     strcpy(data, s1);
-// очередь
+
+    // очередь
     int shmid_two;
     char *startPos;
-    if((shmid_two = shmget(101, SHM_SIZE, 0644 | IPC_CREAT)) == -1) {
+    if((shmid_two = shmget(101, SHM_SIZE, 0644 | IPC_CREAT)) == -1) 
+    {
         perror("shmget");
         exit(1);
     }
-    if ((startPos = (char*)shmat(shmid_two, NULL, 0)) == (void *)-1) {
+    if ((startPos = (char*)shmat(shmid_two, NULL, 0)) == (void *)-1) 
+    {
         perror("shmat");
         exit(1);
     }
 
     int shmid_three;
     int *start;
-    if((shmid_three = shmget(102, SHM_SIZE, 0644 | IPC_CREAT)) == -1) {
+    if((shmid_three = shmget(102, SHM_SIZE, 0644 | IPC_CREAT)) == -1) 
+    {
         perror("shmget");
         exit(1);
     }
-    if ((start = (int*)shmat(shmid_three, NULL, 0)) == (void *)-1) {
+    if ((start = (int*)shmat(shmid_three, NULL, 0)) == (void *)-1) 
+    {
         perror("shmat");
         exit(1);
     }
@@ -70,11 +77,13 @@ int main()
 
     int shmid_four;
     int *end;
-    if((shmid_four = shmget(103, SHM_SIZE, 0644 | IPC_CREAT)) == -1) {
+    if((shmid_four = shmget(103, SHM_SIZE, 0644 | IPC_CREAT)) == -1) 
+    {
         perror("shmget");
         exit(1);
     }
-    if ((end = (int*)shmat(shmid_four, NULL, 0)) == (void *)-1) {
+    if ((end = (int*)shmat(shmid_four, NULL, 0)) == (void *)-1) 
+    {
         perror("shmat");
         exit(1);
     }
@@ -103,12 +112,9 @@ int main()
 
         if (cpid[i] == 0) 
         {
-            if(i % 2 == 0)
-            {
-                producer(fd, data, startPos, start);
-            } else {
-                consumer(fd, startPos, start, end);
-            }
+            if(i % 2 == 0) producer(fd, data, startPos, start);
+            else consumer(fd, startPos, start, end);
+
             exit(EXIT_SUCCESS);
         } else {
             // printf("PP: childpid=%d\n", cpid[i]);
@@ -117,7 +123,7 @@ int main()
 //---
 
 //дожидаемся
-    for(int	i=0;i<6;i++)
+    for(int	i = 0; i < 6; i++)
     {
         w = waitpid(cpid[i], &wstatus, WUNTRACED | WCONTINUED);
         if (w == -1) 
@@ -194,7 +200,7 @@ int producer(int fd, char *data, char *startPos, int *start)
         if(j == 52) j = 0;
 
         startPos[*start] = value;
-        *start+=1;
+        *start += 1;
         if(*start == 10) *start = 0; 
         sleep(1);
 
@@ -213,7 +219,7 @@ int consumer(int fd, char *startPos, int *start, int *end)
         {
             printf("%c", startPos[*end]);
             fflush(stdout);
-            *end+=1;
+            *end += 1;
             if(*end == 10) *end = 0;
         }
         sleep(1);
