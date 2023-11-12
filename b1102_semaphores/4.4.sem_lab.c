@@ -39,7 +39,7 @@ void signal_handler(int sig_num)
 
 int main()
 {
-    pid_t cpid[2], w;
+    pid_t cpid[6], w;
     int wstatus;
 //сигнал
     if(signal(SIGINT, signal_handler)==SIG_ERR) // проверка на ошибку сигнала
@@ -204,6 +204,14 @@ int main()
         perror("shmctl");
     }
 //---
+
+// удаляем группу семафоров
+    if (semctl(fd, 0, IPC_RMID) == -1) 
+    {
+        perror("semctl IPC_RMID");
+    }
+//---
+
     return 0;
 }
 

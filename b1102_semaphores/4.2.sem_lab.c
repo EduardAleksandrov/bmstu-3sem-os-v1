@@ -33,7 +33,7 @@ int consumer(int fd, char *data, char *startPos, char *endPosition, char **fpos,
 
 int main()
 {
-    pid_t cpid[2], w;
+    pid_t cpid[6], w;
     int wstatus;
 
 // установка разделяемой памяти
