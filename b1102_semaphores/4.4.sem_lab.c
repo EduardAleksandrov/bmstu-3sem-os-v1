@@ -1,7 +1,6 @@
 /*
-    TASK Лаба 4: Семафор и разделяемая память
+    TASK Лаба 4: Семафор и разделяемая память, производство/потребление
     Пишем в буфер, а потом читаем из него
-    без указателей - работает
     прикрутить обработчик сигнала - работает
 */
 #define _GNU_SOURCE 
@@ -33,7 +32,7 @@ short flag = 1;
 void signal_handler(int sig_num)
 {
     printf("\n");
-    printf("sig num : %d, pid: %d, ppid %d \n", sig_num, getpid(), getppid());
+    printf("sig num : %d, pid: %d, ppid: %d \n", sig_num, getpid(), getppid());
 	flag = 0;
 }
 
