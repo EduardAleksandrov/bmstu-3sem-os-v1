@@ -37,7 +37,11 @@ int main()
         exit(1);
     }
 
-    printf("%c", data[5]);
+    printf("%c \n", data[5]);
+    char *t;
+    t = &data[5];
+    t++;
+    printf("%c \n", *t);
 
 
 // отсоединяемся от разделяемой памяти
