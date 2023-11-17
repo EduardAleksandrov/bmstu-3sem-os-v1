@@ -22,3 +22,6 @@ run_4.4.sem_lab:
 	gcc -std=c17 ./4.4.sem_lab.c -o build/4.4.sem_lab -g && ./build/4.4.sem_lab
 run_4.4.get_shm:
 	gcc -std=c17 ./4.4.get_shm.c -o build/4.4.get_shm -g && ./build/4.4.get_shm
+
+run_4.5.sem_lab:
+	gcc -std=c17 ./4.5.sem_lab.c -o build/4.5.sem_lab -g && ./build/4.5.sem_lab
