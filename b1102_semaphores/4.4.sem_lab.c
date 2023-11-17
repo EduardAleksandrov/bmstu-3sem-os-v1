@@ -51,9 +51,11 @@ int main()
 // установка разделяемой памяти
     char s1[52] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+    int perms = S_IRWXU | S_IRWXG | S_IRWXO;
+
     int shmid_one;
     char *data;
-    if((shmid_one = shmget(100, SHM_SIZE, 0644 | IPC_CREAT)) == -1) 
+    if((shmid_one = shmget(100, SHM_SIZE, perms | IPC_CREAT)) == -1)  // 0644|IPC_CREAT     0666|IPC_CREAT
     {
         perror("shmget");
         exit(1);
@@ -68,7 +70,7 @@ int main()
     // очередь
     int shmid_two;
     char *startPos;
-    if((shmid_two = shmget(101, SHM_SIZE, 0644 | IPC_CREAT)) == -1) 
+    if((shmid_two = shmget(101, SHM_SIZE, perms | IPC_CREAT)) == -1) 
     {
         perror("shmget");
         exit(1);
@@ -81,7 +83,7 @@ int main()
 
     int shmid_three;
     int *start;
-    if((shmid_three = shmget(102, SHM_SIZE, 0644 | IPC_CREAT)) == -1) 
+    if((shmid_three = shmget(102, SHM_SIZE, perms | IPC_CREAT)) == -1) 
     {
         perror("shmget");
         exit(1);
@@ -95,7 +97,7 @@ int main()
 
     int shmid_four;
     int *end;
-    if((shmid_four = shmget(103, SHM_SIZE, 0644 | IPC_CREAT)) == -1) 
+    if((shmid_four = shmget(103, SHM_SIZE, perms | IPC_CREAT)) == -1) 
     {
         perror("shmget");
         exit(1);
@@ -109,7 +111,6 @@ int main()
 
 //---
 // установка семафора
-    int perms = S_IRWXU | S_IRWXG | S_IRWXO;
     int fd = semget(99, 2, IPC_CREAT | perms);
     if(fd==-1)
     {
