@@ -3,7 +3,7 @@
     Пишем в буфер, а потом читаем из него
 
     !комментарии преподавателя
-    одна разделяемая память
+    одна разделяемая память(первый сегмент cur_prod, второй cur_cons, третий letter, четвертый очередь)
     выделены в функции
 */
 #define _GNU_SOURCE 
@@ -20,7 +20,7 @@
 #include <stdbool.h>
 
 #define SHM_SIZE 1024
-#define Q_SIZE 20
+#define Q_SIZE 10
 
 // se = 0, sf = 1, sb = 2;
 struct sembuf prod_start[2] = {{0,-1, 0}, {2,-1, 0}};
@@ -28,8 +28,8 @@ struct sembuf prod_end[2] = {{2, 1, 1}, {1, 1, 1}};
 struct sembuf cons_start[2] = {{1,-1, 0}, {2,-1, 0}};
 struct sembuf cons_end[2] = {{2, 1, 1}, {0, 1, 1}};
 
-int producer(int fd, char *letter, char **cur_prod);
-int consumer(int fd, char **cur_cons, char **cur_prod);
+int producer(int fd, char *letter, char **cur_prod, char *begin_addr, char *end_addr);
+int consumer(int fd, char **cur_cons, char **cur_prod, char *begin_addr, char *end_addr);
 
 short flag = 1;
 void signal_handler(int sig_num)
@@ -74,9 +74,11 @@ int main()
     cur_prod = (char **) addr;
     cur_cons = (char **) (addr + sizeof(char*));
     letter = (char *) (cur_cons + sizeof(char*));
-    char *begin_addr = letter + sizeof(char);
+    char *begin_addr = letter + sizeof(char); // начало очереди
     (*cur_prod) = begin_addr;
     (*cur_cons) = begin_addr;
+
+    char *end_addr = begin_addr + Q_SIZE; // конец очереди
 
     (*letter) = 'a';
 
@@ -115,11 +117,10 @@ int main()
             perror("fork");
             exit(EXIT_FAILURE);
         }
-
         if (cpid[i] == 0) 
         {
-            if(i % 2 == 0) producer(fd, letter, cur_prod);
-            else consumer(fd, cur_cons, cur_prod);
+            if(i % 2 == 0) producer(fd, letter, cur_prod, begin_addr, end_addr);
+            else consumer(fd, cur_cons, cur_prod, begin_addr, end_addr);
 
             exit(EXIT_SUCCESS);
         } else {
@@ -154,7 +155,6 @@ int main()
 //---
 
 // отсоединяемся и удаляем разделяемую память
-
     if(shmdt((void*)addr) == -1)
     {
         perror("shmdt");
@@ -163,8 +163,6 @@ int main()
     {
         perror("shmctl");
     }
-
-    
 //---
 
 // удаляем группу семафоров
@@ -177,18 +175,20 @@ int main()
     return 0;
 }
 
-int producer(int fd, char *letter, char **cur_prod)
+int producer(int fd, char *letter, char **cur_prod, char *begin_addr, char *end_addr)
 {
     int j = 0;
     while(flag)
     {
         semop(fd, prod_start, 2);
+
         (*letter) = 'a' + j;
         j++;
         if(j == 26) j = 0;
         
         (**cur_prod) = (*letter);
         (*cur_prod)++;
+        if(end_addr == (*cur_prod)) (*cur_prod) = begin_addr; // циклическая очередь
 
         sleep(1);
 
@@ -197,7 +197,7 @@ int producer(int fd, char *letter, char **cur_prod)
     return 0;
 }
 
-int consumer(int fd, char **cur_cons, char **cur_prod)
+int consumer(int fd, char **cur_cons, char **cur_prod, char *begin_addr, char *end_addr)
 {
     while(flag)
     {
@@ -208,7 +208,9 @@ int consumer(int fd, char **cur_cons, char **cur_prod)
             printf("%c", **cur_cons);
             fflush(stdout);
             (*cur_cons)++;
+            if(end_addr == (*cur_cons)) (*cur_cons) = begin_addr; // циклическая очередь
         }
+
         sleep(1);
         
         semop(fd, cons_end, 2);
