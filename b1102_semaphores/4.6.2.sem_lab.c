@@ -190,7 +190,7 @@ int producer(int fd, char *letter, char **cur_prod, char *begin_addr, char *end_
         (*cur_prod)++;
         if(end_addr == (*cur_prod)) (*cur_prod) = begin_addr; // циклическая очередь
 
-        sleep(1);
+        usleep(100000); //0.1 second
 
         semop(fd, prod_end, 2);
     }
@@ -211,7 +211,7 @@ int consumer(int fd, char **cur_cons, char **cur_prod, char *begin_addr, char *e
             if(end_addr == (*cur_cons)) (*cur_cons) = begin_addr; // циклическая очередь
         }
 
-        sleep(1);
+        usleep(100000);
         
         semop(fd, cons_end, 2);
     }
