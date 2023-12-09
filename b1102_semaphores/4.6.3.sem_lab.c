@@ -5,6 +5,7 @@
     !комментарии преподавателя
     одна разделяемая память(первый сегмент cur_prod, второй cur_cons, третий letter, четвертый очередь)
     выделены в функции
+    !комментарии преподавателя
     работает
 */
 #define _GNU_SOURCE 
@@ -19,9 +20,9 @@
 #include <sys/sem.h>
 #include <fcntl.h> // S_IRWXU
 #include <stdbool.h>
+#include <time.h>
 
 #define SHM_SIZE 1024
-#define Q_SIZE 10
 
 // se = 0, sf = 1, sb = 2;
 struct sembuf prod_start[2] = {{0,-1, 0}, {2,-1, 0}};
@@ -29,14 +30,14 @@ struct sembuf prod_end[2] = {{2, 1, 1}, {1, 1, 1}};
 struct sembuf cons_start[2] = {{1,-1, 0}, {2,-1, 0}};
 struct sembuf cons_end[2] = {{2, 1, 1}, {0, 1, 1}};
 
-int producer(int fd, char *letter, char **cur_prod, char *begin_addr, char *end_addr);
-int consumer(int fd, char **cur_cons, char **cur_prod, char *begin_addr, char *end_addr);
+void producer(int fd_sem, char *letter, char **cur_prod);
+void consumer(int fd_sem, char **cur_cons);
 
 short flag = 1;
 void signal_handler(int sig_num)
 {
     printf("\n");
-    printf("sig num : %d, pid: %d, ppid: %d \n", sig_num, getpid(), getppid());
+    printf("sig num : %d, pid: %d \n", sig_num, getpid());
 	flag = 0;
 }
 
@@ -75,34 +76,32 @@ int main()
     cur_prod = (char **) addr;
     cur_cons = (char **) (addr + sizeof(char*));
     letter = (char *) (cur_cons + sizeof(char*));
-    char *begin_addr = letter + sizeof(char); // начало очереди
+    char *begin_addr = letter + sizeof(char);
     (*cur_prod) = begin_addr;
     (*cur_cons) = begin_addr;
-
-    char *end_addr = begin_addr + Q_SIZE; // конец очереди
 
     (*letter) = 'a';
 
 //---
 // установка семафора
-    int fd = semget(99, 3, IPC_CREAT | perms);
-    if(fd==-1)
+    int fd_sem = semget(99, 3, IPC_CREAT | perms);
+    if(fd_sem==-1)
     {
         perror("semop");
         exit(EXIT_FAILURE);
     }
     
-    if(semctl(fd, 0, SETVAL, 5) < 0) //установка начальных значений для семафоров  se = 0, sf = 1, sb = 2;
+    if(semctl(fd_sem, 0, SETVAL, 5) < 0) //установка начальных значений для семафоров  se = 0, sf = 1, sb = 2;
     {
         printf("Ошибка 1\n");
         exit(EXIT_FAILURE);
     }
-    if(semctl(fd, 1, SETVAL, 0) < 0)
+    if(semctl(fd_sem, 1, SETVAL, 0) < 0)
     {
         printf("Ошибка 2\n");
         exit(EXIT_FAILURE);
     }
-    if(semctl(fd, 2, SETVAL, 1) < 0)
+    if(semctl(fd_sem, 2, SETVAL, 1) < 0)
     {
         printf("Ошибка 3\n");
         exit(EXIT_FAILURE);
@@ -120,8 +119,8 @@ int main()
         }
         if (cpid[i] == 0) 
         {
-            if(i % 2 == 0) producer(fd, letter, cur_prod, begin_addr, end_addr);
-            else consumer(fd, cur_cons, cur_prod, begin_addr, end_addr);
+            if(i % 2 == 0) producer(fd_sem, letter, cur_prod);
+            else consumer(fd_sem, cur_cons);
 
             exit(EXIT_SUCCESS);
         } else {
@@ -157,64 +156,54 @@ int main()
 
 // отсоединяемся и удаляем разделяемую память
     if(shmdt((void*)addr) == -1)
-    {
         perror("shmdt");
-    }
     if(shmctl(shmid_one, IPC_RMID, NULL) == -1)
-    {
         perror("shmctl");
-    }
 //---
 
 // удаляем группу семафоров
-    if (semctl(fd, 0, IPC_RMID) == -1) 
-    {
+    if (semctl(fd_sem, 0, IPC_RMID) == -1) 
         perror("semctl IPC_RMID");
-    }
 //---
 
     return 0;
 }
 
-int producer(int fd, char *letter, char **cur_prod, char *begin_addr, char *end_addr)
+void producer(int fd_sem, char *letter, char **cur_prod)
 {
-    int j = 0;
+    srand(time(NULL));
+    int min = 100000, max = 999999; // микросекунды (0.1 second)
+
     while(flag)
     {
-        semop(fd, prod_start, 2);
+        int time_i = min + rand() % (max - min + 1); // interval
 
-        (*letter) = 'a' + j;
-        j++;
-        if(j == 26) j = 0;
-        
+        semop(fd_sem, prod_start, 2);
+
         (**cur_prod) = (*letter);
         (*cur_prod)++;
-        if(end_addr == (*cur_prod)) (*cur_prod) = begin_addr; // циклическая очередь
 
-        usleep(100000); //0.1 second
+        (*letter)++;
+        if((*letter) == '{') (*letter) = 'a'; // { - знак после z
 
-        semop(fd, prod_end, 2);
+        usleep(time_i);
+
+        semop(fd_sem, prod_end, 2);
     }
-    return 0;
+    exit(EXIT_SUCCESS);
 }
 
-int consumer(int fd, char **cur_cons, char **cur_prod, char *begin_addr, char *end_addr)
+void consumer(int fd_sem, char **cur_cons)
 {
     while(flag)
     {
-        semop(fd, cons_start, 2);
-
-        if((*cur_cons) != (*cur_prod))
-        {   
-            printf("%c", **cur_cons);
-            fflush(stdout);
-            (*cur_cons)++;
-            if(end_addr == (*cur_cons)) (*cur_cons) = begin_addr; // циклическая очередь
-        }
-
-        usleep(100000);
+        semop(fd_sem, cons_start, 2);
+ 
+        printf("%c", **cur_cons);
+        fflush(stdout);
+        (*cur_cons)++;
         
-        semop(fd, cons_end, 2);
+        semop(fd_sem, cons_end, 2);
     }
-    return 0;
+    exit(EXIT_SUCCESS);
 }
