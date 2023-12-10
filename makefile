@@ -26,3 +26,6 @@ run4.system:
 
 run5.filetable:
 	gcc -std=c17 ./5.filetable.c -o build/5.filetable -g && ./build/5.filetable
+
+run6.pthreads:
+	gcc -std=c17 ./6.pthreads.c  -lpthread -o build/6.pthreads -g && ./build/6.pthreads
